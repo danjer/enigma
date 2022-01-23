@@ -1,39 +1,64 @@
 import string
-import random
 from dataclasses import dataclass, field
 
 
-def create_random_rotor_wiring():
-    available = list(range(len(string.ascii_uppercase)))
-    return {i: available.pop(random.randrange(0, len(available))) for i in range(len(string.ascii_uppercase))}
+def read_mapping(mapping_string):
+    return {k: string.ascii_uppercase.index(v) for k, v in enumerate(mapping_string)}
 
-def create_random_reflector_wiring():
-    wiring = {}
-    available = list(range(len(string.ascii_uppercase)))
-    while available:
-        first, second = available.pop(random.randrange(0, len(available))), available.pop(random.randrange(0, len(available)))
-        wiring[first] = second
-        wiring[second] = first
-    return wiring
+
+@dataclass
+class RotorType:
+    name: string
+    mapping_string: string
+    notch_position: string
+
+
+@dataclass
+class ReflectorType:
+    name: string
+    mapping_string: string
+
+
+I = RotorType("I", "EKMFLGDQVZNTOWYHXUSPAIBRCJ", "Q")
+Beta = ReflectorType("Beta", "LEYJVCNIXWPBQMDRTAKZGFUHOS")
 
 
 @dataclass
 class Rotor:
-    wiring: dict = field(default_factory=create_random_rotor_wiring)
+    rotor_type: RotorType = field(default=I)
+    ring_setting: string = field(default="A")
+    start_position: string = field(default="A")
+    forward: dict = field(init=False)
+    reverse: dict = field(init=False)
 
-    def feed(self, letter, backward=False):
-        wire_map = self.wiring if not backward else {v: k for k, v in self.wiring.items()}
-        return string.ascii_uppercase[wire_map[string.ascii_uppercase.index(letter)]]
+    def __post_init__(self):
+        ring_offset = string.ascii_uppercase.index(self.ring_setting)
+        rotor_offset = string.ascii_uppercase.index(self.start_position)
+        self.forward = {(k + rotor_offset) % 26: (v + rotor_offset + ring_offset) % 26 for k, v in
+                        read_mapping(self.rotor_type.mapping_string).items()}
+        self.reverse = {v: k for k, v in self.forward.items()}
 
+    def feed_index(self, index: int, backward=False):
+        mapping = self.forward if not backward else self.reverse
+        return mapping[index]
+
+    def feed_letter(self, letter: str):
+        return string.ascii_uppercase[self.feed_index(string.ascii_uppercase.index(letter))]
 
 
 @dataclass
 class Reflector:
-    wiring: dict = field(default_factory=create_random_reflector_wiring)
+    reflector_type: ReflectorType = field(default=Beta)
+    forward: dict = field(init=False)
 
-    def feed(self, letter):
-        index = string.ascii_uppercase.index(letter)
-        return string.ascii_uppercase[self.wiring[index]]
+    def __post_init__(self):
+        self.forward = read_mapping(self.reflector_type.mapping_string)
+
+    def feed_index(self, letter: int):
+        return self.forward[letter]
+
+    def feed_letter(self, letter: str):
+        return string.ascii_uppercase[self.feed_index(string.ascii_uppercase.index(letter))]
 
 
 @dataclass
@@ -42,54 +67,20 @@ class EnigmaBox:
     second_rotor: Rotor = field(default_factory=Rotor)
     third_rotor: Rotor = field(default_factory=Rotor)
     reflector: Reflector = field(default_factory=Reflector)
-    first_offset: int = field(default=0)
-    second_offset: int = field(default=0)
-    third_offset: int = field(default=0)
-    ticks: int = field(default=1)
 
-    @property
-    def offsets(self):
-        return (self.third_offset, self.second_offset, self.first_offset)
-
-    def forward_pass(self, letter):
+    def forward_pass(self, letter: int):
         for rotor in (self.first_rotor, self.second_rotor, self.third_rotor):
-            letter = rotor.feed(letter)
+            letter = rotor.feed_index(letter)
         return letter
 
-    def back_pass(self, letter):
+    def back_pass(self, letter: int):
         for rotor in (self.third_rotor, self.second_rotor, self.first_rotor):
-            letter = rotor.feed(letter, backward=True)
+            letter = rotor.feed_index(letter, backward=True)
         return letter
-
-    def rotate_rotor(self, rotor, amount=1):
-        updated_wiring = {(k + amount)%len(string.ascii_uppercase): (v + amount)%len(string.ascii_uppercase) for k, v in rotor.wiring.items()}
-        rotor.wiring = updated_wiring
-
-    def rotate_rotors(self):
-        if self.ticks % 1 == 0:
-            self.rotate_rotor(self.first_rotor)
-            self.first_offset = (self.first_offset + 1) % len(string.ascii_uppercase)
-        if self.ticks % (1 * 26) == 0:
-            self.rotate_rotor(self.second_rotor)
-            self.second_offset = (self.second_offset + 1) % len(string.ascii_uppercase)
-        if self.ticks % (1 * 26 * 26) == 0:
-            self.rotate_rotor(self.third_rotor)
-            self.third_offset = (self.third_offset + 1) % len(string.ascii_uppercase)
-
-    def reset(self):
-        offsets_rotors = zip(self.offsets, (self.third_rotor, self.second_rotor, self.first_rotor))
-        for offset, rotor in offsets_rotors:
-            self.rotate_rotor(rotor, -1 * offset)
-        self.first_offset, self.second_offset, self.third_offset = 0, 0, 0
-        self.ticks = 0
-
 
     def encrypt_letter(self, letter):
-        self.ticks += 1
-        self.rotate_rotors()
-        return self.back_pass(self.reflector.feed(self.forward_pass(letter)))
-
+        index = string.ascii_uppercase.index(letter)
+        return string.ascii_uppercase[self.back_pass(self.reflector.feed_index(self.forward_pass(index)))]
 
     def encrypt(self, text):
         return "".join([self.encrypt_letter(letter) for letter in text])
-

@@ -43,13 +43,13 @@ class Rotor:
         ring_offset = string.ascii_uppercase.index(self.ring_setting)
         rotor_offset = string.ascii_uppercase.index(self.start_position)
         self.notch_position = (
-            string.ascii_uppercase.index(self.rotor_type.notch_position) + rotor_offset
-        ) % ROTOR_SIZE
+                                      string.ascii_uppercase.index(self.rotor_type.notch_position) + rotor_offset
+                              ) % ROTOR_SIZE
         self.current_position = ring_offset
         self.forward = {
             (k + rotor_offset)
             % ROTOR_SIZE: (v + rotor_offset + ring_offset)
-            % ROTOR_SIZE
+                          % ROTOR_SIZE
             for k, v in read_mapping(self.rotor_type.mapping_string).items()
         }
         self.reverse = {v: k for k, v in self.forward.items()}

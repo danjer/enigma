@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>839</width>
-    <height>662</height>
+    <width>972</width>
+    <height>805</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,7 +31,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>100</height>
+             <height>0</height>
             </size>
            </property>
            <property name="frameShape">
@@ -42,38 +42,128 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout">
+             <widget class="QLabel" name="label_3">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Enigma settings</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="line_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QLabel" name="label_4">
-                <property name="text">
-                 <string>Current rotor positions:</string>
-                </property>
-               </widget>
+               <layout class="QVBoxLayout" name="verticalLayout_10">
+                <item>
+                 <widget class="QLabel" name="label_4">
+                  <property name="maximumSize">
+                   <size>
+                    <width>297</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Rotors</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_2"/>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_3"/>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox"/>
+                </item>
+               </layout>
               </item>
               <item>
-               <widget class="QLabel" name="position_label">
-                <property name="text">
-                 <string>A-A-A</string>
-                </property>
-               </widget>
+               <layout class="QVBoxLayout" name="verticalLayout_11">
+                <item>
+                 <widget class="QLabel" name="label_5">
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Rings</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_4"/>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_6"/>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_5"/>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_12">
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Positions</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_7"/>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_9"/>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="comboBox_8"/>
+                </item>
+               </layout>
               </item>
              </layout>
             </item>
-            <item>
-             <widget class="QPushButton" name="reset_button">
-              <property name="text">
-               <string>RESET</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="encrypt_button">
-              <property name="text">
-               <string>ENCRYPT</string>
-              </property>
-             </widget>
-            </item>
            </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="encrypt_button">
+           <property name="text">
+            <string>ENCRYPT</string>
+           </property>
           </widget>
          </item>
          <item>
@@ -99,7 +189,7 @@
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>Input</string>
+            <string>Input text</string>
            </property>
           </widget>
          </item>
@@ -109,7 +199,7 @@
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Output</string>
+            <string>Encrypted text</string>
            </property>
           </widget>
          </item>
@@ -128,7 +218,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>839</width>
+     <width>972</width>
      <height>22</height>
     </rect>
    </property>

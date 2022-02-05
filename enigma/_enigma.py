@@ -2,6 +2,20 @@ import string
 from dataclasses import dataclass, field
 from enigma._rotors import rotor_factory, reflector_factory, Rotor, Reflector
 
+class PlugBoard:
+
+    def __init__(self, pairs):
+        self.mapping = {}
+        if pairs:
+            for first, second in pairs.split():
+                self.mapping[first] = second
+                self.mapping[second] = first
+
+    def feed(self, letter):
+        try:
+            return self.mapping[letter]
+        except KeyError:
+            return letter
 
 @dataclass
 class Enigma:
@@ -9,11 +23,13 @@ class Enigma:
     reflector_type: string = field(default="B")
     ring_settings: string = field(default="A,A,A")
     rotor_offsets: string = field(default="A,A,A")
+    plugboard_pairs: string = field(default="")
 
     first_rotor: Rotor = field(init=False)
     second_rotor: Rotor = field(init=False)
     third_rotor: Rotor = field(init=False)
     reflector: Reflector = field(init=False)
+    plugboard: PlugBoard = field(init=False)
 
     def __post_init__(self):
         third_rotor, second_rotor, first_rotor = self.rotor_types.split(",")
@@ -25,6 +41,8 @@ class Enigma:
         self.third_rotor = rotor_factory(third_rotor, third_ring_s, third_offset)
 
         self.reflector = reflector_factory(self.reflector_type)
+
+        self.plugboard = PlugBoard(self.plugboard_pairs)
 
     def forward_pass(self, letter: int):
         for rotor in (self.first_rotor, self.second_rotor, self.third_rotor):
@@ -58,12 +76,12 @@ class Enigma:
             self.third_rotor.rotate()
 
     def encrypt_letter(self, letter):
-        letter = letter.upper()
+        letter = self.plugboard.feed(letter.upper())
         self.rotate_rotors()
         index = string.ascii_uppercase.index(letter)
-        return string.ascii_uppercase[
+        return self.plugboard.feed(string.ascii_uppercase[
             self.back_pass(self.reflector.feed_index(self.forward_pass(index)))
-        ]
+        ])
 
     def encrypt(self, text):
         return "".join([self.encrypt_letter(letter) for letter in text])

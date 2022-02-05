@@ -45,7 +45,8 @@ class Rotor:
         self.notch_position = (
                                       string.ascii_uppercase.index(self.rotor_type.notch_position) + rotor_offset
                               ) % ROTOR_SIZE
-        self.current_position = ring_offset
+        #self.current_position = ring_offset
+        self.current_position = rotor_offset
         self.forward = {
             (k + rotor_offset)
             % ROTOR_SIZE: (v + rotor_offset + ring_offset)

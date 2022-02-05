@@ -7,8 +7,8 @@ from enigma._rotors import rotor_factory, reflector_factory, Rotor, Reflector
 class Enigma:
     rotor_types: string = field(default="I,II,III")
     reflector_type: string = field(default="B")
-    ring_settings: string = field(default="AAA")
-    rotor_offsets: string = field(default="AAA")
+    ring_settings: string = field(default="A,A,A")
+    rotor_offsets: string = field(default="A,A,A")
 
     first_rotor: Rotor = field(init=False)
     second_rotor: Rotor = field(init=False)
@@ -17,8 +17,8 @@ class Enigma:
 
     def __post_init__(self):
         third_rotor, second_rotor, first_rotor = self.rotor_types.split(",")
-        third_ring_s, second_ring_s, first_ring_s = self.ring_settings
-        third_offset, second_offset, first_offset = self.rotor_offsets
+        third_ring_s, second_ring_s, first_ring_s = self.ring_settings.split(",")
+        third_offset, second_offset, first_offset = self.rotor_offsets.split(",")
 
         self.first_rotor = rotor_factory(first_rotor, first_ring_s, first_offset)
         self.second_rotor = rotor_factory(second_rotor, second_ring_s, second_offset)

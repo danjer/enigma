@@ -86,7 +86,6 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.setup_logic()
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -99,28 +98,3 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Input"))
         self.label_2.setText(_translate("MainWindow", "Output"))
 
-    def setup_logic(self):
-        self.encrypt_button.clicked.connect(self.encrypt)
-        self.reset_button.clicked.connect(self.reset)
-
-    def encrypt(self):
-        self.output_field.setPlainText(self.enigma.encrypt(self.input_field.toPlainText()))
-        self.update_enigma_state()
-
-    def update_enigma_state(self):
-        self.position_label.setText("-".join(self.enigma.current_state))
-
-    def reset(self):
-        self.enigma = Enigma()
-        self.update_enigma_state()
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

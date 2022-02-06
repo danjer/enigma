@@ -62,7 +62,7 @@ class Rotor:
     def rotate(self):
         self.current_position = (self.current_position + 1) % ROTOR_SIZE
         self.forward = {
-            (k + 1) % ROTOR_SIZE: (v + 1) % ROTOR_SIZE for k, v in self.forward.items()
+            (k  -1) % ROTOR_SIZE: (v - 1) % ROTOR_SIZE for k, v in self.forward.items()
         }
         self.reverse = {v: k for k, v in self.forward.items()}
 

@@ -1,10 +1,13 @@
+"""wraps the gui class defined in _gui and adds the event logic"""
+
 import string
 from PyQt5 import QtWidgets
 from _enigma import Enigma
-from _rotors import ROTORS
-from gui import Ui_MainWindow
+from _rotors import ROTORS, REFLECTORS
+from _gui import Ui_Enigma
 
-class WrappedUi(Ui_MainWindow):
+
+class WrappedUi(Ui_Enigma):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,16 +28,30 @@ class WrappedUi(Ui_MainWindow):
         self.position_2.addItems([c for c in string.ascii_uppercase])
         self.position_3.addItems([c for c in string.ascii_uppercase])
 
+        self.reflector.addItems([rf.name for rf in REFLECTORS])
+
     def setup_logic(self):
         self.encrypt_button.clicked.connect(self.encrypt)
 
     def encrypt(self):
         rotors = ",".join([self.rotor_1.currentText(), self.rotor_2.currentText(), self.rotor_3.currentText()])
+        reflector = self.reflector.currentText()
         ring_settings = ",".join([self.ring_1.currentText(), self.ring_2.currentText(), self.ring_3.currentText()])
-        ring_positions = ",".join([self.position_1.currentText(), self.position_2.currentText(), self.position_3.currentText()])
-        self.enigma = Enigma(rotors, "B", ring_settings, ring_positions)
-        self.output_field.setPlainText(self.enigma.encrypt(self.input_field.toPlainText()))
-        self.update_gui_state()
+        ring_positions = ",".join(
+            [self.position_1.currentText(), self.position_2.currentText(), self.position_3.currentText()])
+        plugboard_pairs = self.read_plugboard()
+        self.enigma = Enigma(rotors, reflector, ring_settings, ring_positions, plugboard_pairs)
+        input_text = [l for l in self.input_field.toPlainText().upper() if l in string.ascii_uppercase]
+        self.output_field.setPlainText(self.enigma.encrypt(input_text))
+
+    def read_plugboard(self):
+        plugboard_pairs = self.plugboard.toPlainText().upper()
+        if all([p in string.ascii_uppercase + " " for p in plugboard_pairs]) and all(
+                [len(p) == 2 for p in plugboard_pairs.split(" ")]):
+            return plugboard_pairs
+        else:
+            self.plugboard.setPlainText("")
+            return ""
 
     def update_gui_state(self):
         first, second, third = self.enigma.current_state

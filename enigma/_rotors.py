@@ -22,10 +22,16 @@ ROTORS = [
     RotorType("II", "AJDKSIRUXBLHWTMCQGZNPYFVOE", "E"),
     RotorType("III", "BDFHJLCPRTXVZNYEIWGAKMUSQO", "V"),
     RotorType("IV", "ESOVPZJAYQUIRHXLNFTGKDCMWB", "J"),
+    RotorType("V", "VZBRGITYUPSDNHLXAWMJQOFECK", "Z"),
+    RotorType("VI", "JPGVOUMFYQBENHZRDKASXLICTW", "M"),
+    RotorType("VII", "NZJHGRCXMYSWBOUFAIVLPEKQDT", "M"),
+    RotorType("VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", "M"),
 ]
 
 REFLECTORS = [
+    ReflectorType("A", "EJMZALYXVBWFCRQUONTSPIKHGD"),
     ReflectorType("B", "YRUHQSLDPXNGOKMIEBFZCWVJAT"),
+    ReflectorType("C", "FVPJIAOYEDRZXWGCTKUQSBNMHL"),
 ]
 
 
@@ -45,11 +51,10 @@ class Rotor:
         self.notch_position = (
                                       string.ascii_uppercase.index(self.rotor_type.notch_position) + rotor_offset
                               ) % ROTOR_SIZE
-        #self.current_position = ring_offset
         self.current_position = rotor_offset
         self.forward = {
-            (k + rotor_offset)
-            % ROTOR_SIZE: (v + rotor_offset + ring_offset)
+            (k - rotor_offset + ring_offset)
+            % ROTOR_SIZE: (v - rotor_offset + ring_offset)
                           % ROTOR_SIZE
             for k, v in read_mapping(self.rotor_type.mapping_string).items()
         }
@@ -62,7 +67,7 @@ class Rotor:
     def rotate(self):
         self.current_position = (self.current_position + 1) % ROTOR_SIZE
         self.forward = {
-            (k  -1) % ROTOR_SIZE: (v - 1) % ROTOR_SIZE for k, v in self.forward.items()
+            (k - 1) % ROTOR_SIZE: (v - 1) % ROTOR_SIZE for k, v in self.forward.items()
         }
         self.reverse = {v: k for k, v in self.forward.items()}
 

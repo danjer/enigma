@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='Pynigma',
+    name='engima',
     version='1.0.0',
     py_modules=['enigma'],
     install_requires=[

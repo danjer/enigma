@@ -176,14 +176,3 @@ class Ui_Enigma(object):
         self.encrypt_button.setText(_translate("Enigma", "ENCRYPT"))
         self.label.setText(_translate("Enigma", "Input text"))
         self.label_2.setText(_translate("Enigma", "Encrypted text"))
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-    Enigma = QtWidgets.QMainWindow()
-    ui = Ui_Enigma()
-    ui.setupUi(Enigma)
-    Enigma.show()
-    sys.exit(app.exec_())

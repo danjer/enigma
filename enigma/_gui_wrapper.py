@@ -2,9 +2,9 @@
 
 import string
 from PyQt5 import QtWidgets
-from _enigma import Enigma
-from _rotors import ROTORS, REFLECTORS
-from _gui import Ui_Enigma
+from enigma._enigma import Enigma
+from enigma._rotors import ROTORS, REFLECTORS
+from enigma._gui import Ui_Enigma
 
 
 class WrappedUi(Ui_Enigma):
@@ -69,7 +69,7 @@ class WrappedUi(Ui_Enigma):
     def read_plugboard(self):
         plugboard_pairs = self.plugboard.toPlainText().upper()
         if all([p in string.ascii_uppercase + " " for p in plugboard_pairs]) and all(
-            [len(p) == 2 for p in plugboard_pairs.split(" ")]
+                [len(p) == 2 for p in plugboard_pairs.split(" ")]
         ):
             return plugboard_pairs
         else:
@@ -83,7 +83,7 @@ class WrappedUi(Ui_Enigma):
         self.position_3.setCurrentText(third)
 
 
-if __name__ == "__main__":
+def main():
     import sys
 
     app = QtWidgets.QApplication(sys.argv)

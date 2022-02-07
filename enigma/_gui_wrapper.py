@@ -8,7 +8,6 @@ from _gui import Ui_Enigma
 
 
 class WrappedUi(Ui_Enigma):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.enigma = Enigma()
@@ -34,20 +33,44 @@ class WrappedUi(Ui_Enigma):
         self.encrypt_button.clicked.connect(self.encrypt)
 
     def encrypt(self):
-        rotors = ",".join([self.rotor_1.currentText(), self.rotor_2.currentText(), self.rotor_3.currentText()])
+        rotors = ",".join(
+            [
+                self.rotor_1.currentText(),
+                self.rotor_2.currentText(),
+                self.rotor_3.currentText(),
+            ]
+        )
         reflector = self.reflector.currentText()
-        ring_settings = ",".join([self.ring_1.currentText(), self.ring_2.currentText(), self.ring_3.currentText()])
+        ring_settings = ",".join(
+            [
+                self.ring_1.currentText(),
+                self.ring_2.currentText(),
+                self.ring_3.currentText(),
+            ]
+        )
         ring_positions = ",".join(
-            [self.position_1.currentText(), self.position_2.currentText(), self.position_3.currentText()])
+            [
+                self.position_1.currentText(),
+                self.position_2.currentText(),
+                self.position_3.currentText(),
+            ]
+        )
         plugboard_pairs = self.read_plugboard()
-        self.enigma = Enigma(rotors, reflector, ring_settings, ring_positions, plugboard_pairs)
-        input_text = [l for l in self.input_field.toPlainText().upper() if l in string.ascii_uppercase]
+        self.enigma = Enigma(
+            rotors, reflector, ring_settings, ring_positions, plugboard_pairs
+        )
+        input_text = [
+            l
+            for l in self.input_field.toPlainText().upper()
+            if l in string.ascii_uppercase
+        ]
         self.output_field.setPlainText(self.enigma.encrypt(input_text))
 
     def read_plugboard(self):
         plugboard_pairs = self.plugboard.toPlainText().upper()
         if all([p in string.ascii_uppercase + " " for p in plugboard_pairs]) and all(
-                [len(p) == 2 for p in plugboard_pairs.split(" ")]):
+            [len(p) == 2 for p in plugboard_pairs.split(" ")]
+        ):
             return plugboard_pairs
         else:
             self.plugboard.setPlainText("")

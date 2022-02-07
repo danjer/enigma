@@ -53,7 +53,9 @@ class Ui_Enigma(object):
         self.reflector = QtWidgets.QComboBox(self.frame_2)
         self.reflector.setObjectName("reflector")
         self.verticalLayout_6.addWidget(self.reflector)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_6.addItem(spacerItem)
         self.horizontalLayout_2.addLayout(self.verticalLayout_6)
         self.verticalLayout_10 = QtWidgets.QVBoxLayout()
@@ -120,12 +122,16 @@ class Ui_Enigma(object):
         self.verticalLayout_8.addWidget(self.plugboard)
         self.verticalLayout_4.addWidget(self.frame_3)
         self.verticalLayout_2.addWidget(self.frame_2)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.verticalLayout_2.addItem(spacerItem1)
         self.encrypt_button = QtWidgets.QPushButton(self.frame)
         self.encrypt_button.setObjectName("encrypt_button")
         self.verticalLayout_2.addWidget(self.encrypt_button)
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.verticalLayout_2.addItem(spacerItem2)
         self.line = QtWidgets.QFrame(self.frame)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
@@ -174,6 +180,7 @@ class Ui_Enigma(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     Enigma = QtWidgets.QMainWindow()
     ui = Ui_Enigma()

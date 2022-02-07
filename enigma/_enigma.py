@@ -2,8 +2,8 @@ import string
 from dataclasses import dataclass, field
 from enigma._rotors import rotor_factory, reflector_factory, Rotor, Reflector
 
-class PlugBoard:
 
+class PlugBoard:
     def __init__(self, pairs):
         self.mapping = {}
         if pairs:
@@ -16,6 +16,7 @@ class PlugBoard:
             return self.mapping[letter]
         except KeyError:
             return letter
+
 
 @dataclass
 class Enigma:
@@ -79,9 +80,11 @@ class Enigma:
         letter = self.plugboard.feed(letter.upper())
         self.rotate_rotors()
         index = string.ascii_uppercase.index(letter)
-        return self.plugboard.feed(string.ascii_uppercase[
-            self.back_pass(self.reflector.feed_index(self.forward_pass(index)))
-        ])
+        return self.plugboard.feed(
+            string.ascii_uppercase[
+                self.back_pass(self.reflector.feed_index(self.forward_pass(index)))
+            ]
+        )
 
     def encrypt(self, text):
         return "".join([self.encrypt_letter(letter) for letter in text])

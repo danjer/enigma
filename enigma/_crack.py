@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from itertools import permutations, product
 from enigma._enigma import Enigma
-from collections import defaultdict
+from collections import deque
 
 
 def get_possible_settings():
@@ -36,41 +36,32 @@ def build_loop_graph(cypher_text, crib):
     g.add_weighted_edges_from(weighted_edges)
     return g
 
+
 def list_paths(g):
     cycles = nx.cycle_basis(g)
-    print(cycles)
+    nw_cycles = []
+    for cycle in cycles:
+        shifted_cycle = deque(cycle)
+        shifted_cycle.rotate(1)
+        shifted_cycle = list(shifted_cycle)
+        nw_cycles.append([(n1, g.get_edge_data(n1, n2)['weight'], n2) for n1, n2 in zip(shifted_cycle, cycle)])
+    return nw_cycles
 
 
-class Graph:
-    def __init__(self, directional=False):
-        self._directional = directional
-        self._graph = defaultdict(set)
+def check_plugboard_assumption():
+    pass
 
-    def add_edge(self, node1, node2, weight=0):
-        self._graph[node1].add((weight, node2), )
-        if not self._directional:
-            self._graph[node2].add((weight, node1), )
 
-    # def find_all_loops(self):
-    #     starting_nodes = list(self._graph.keys())
-    #     in_loop
-    #     for n in
+def create_plugbaord():
+    pass
 
-    def find_loop(self, start_node, current_node=None, visited_nodes=None, previous_node=None):
-        current_node = current_node if current_node else start_node
-        visited_nodes = set(visited_nodes) if visited_nodes else set()
-        visited_nodes.add(current_node)
-        sub_paths = []
-        for weight, next_node in self._graph[current_node]:
-            base_path = ((current_node, weight, next_node),)
-            if next_node == start_node and next_node != previous_node:
-                sub_paths.append(base_path)
-                continue
-            if next_node in visited_nodes:
-                continue
-            for sp in self.find_loop(start_node, next_node, visited_nodes, current_node):
-                sub_paths.append(base_path + sp)
-        return sub_paths
+
+def testje():
+    e = Enigma(plugboard_pairs="AB,OM,CD,HQ,XZ,NK,EP,WT")
+    text = "watmoetiktocheensschrijvenhierhetmoetwellanggenoegzijn".upper()
+    ct = e.encrypt(text)
+    g = build_loop_graph(ct, text)
+    print(list_paths(g))
 
 
 if __name__ == "__main__":
@@ -80,6 +71,4 @@ if __name__ == "__main__":
     list_paths(g)
     nx.draw_circular(g)
     plt.show()
-
-
-
+    testje()

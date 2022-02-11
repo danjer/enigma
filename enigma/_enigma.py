@@ -7,7 +7,7 @@ class PlugBoard:
     def __init__(self, pairs):
         self.mapping = {}
         if pairs:
-            for first, second in pairs.split():
+            for first, second in pairs.split(","):
                 self.mapping[first] = second
                 self.mapping[second] = first
 

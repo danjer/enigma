@@ -122,13 +122,13 @@ class PlugBoardCracker:
 
 
 if __name__ == "__main__":
-    e = Enigma(rotor_offsets="A,A,A", plugboard_pairs="OM,CU,HQ,XZ,NK,EP,WT,DL")
+    e = Enigma(ring_settings="I,B,Z", plugboard_pairs="OM,CU,HQ,XZ,NK,EP,WT,DL")
     text = "WettervorhersageXfurxdiexRegionxMoskau".upper()
     ct = e.encrypt(text)
     print("finding best candidates for rotor settings...")
     ro = RotorOrder(text, ct)
     ro.get_rotor_order()
-    best = ro.best_settings[-1000:]
+    best = ro.best_settings[-100:]
     for setting,score in best:
         pbc = PlugBoardCracker(text, ct, setting)
         try:

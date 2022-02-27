@@ -4,6 +4,7 @@ import networkx as nx
 from itertools import permutations, product
 from enigma._enigma import Enigma
 from collections import deque, defaultdict
+from tqdm import tqdm
 
 
 class InvalidSettings(Exception):
@@ -45,18 +46,20 @@ class RotorOrderResolver:
         self.best_settings = []
         self.best_score = -1
 
-    def asses_rotor_orders(self):
-        for rotor_setting in get_possible_settings():
+    def get_n_best_rotor_settings(self, n):
+        print('Resolving rotor settings...')
+        for rotor_setting in tqdm(list(get_possible_settings())):
             current_score = self.score_setting(rotor_setting)
             self.best_settings.append((rotor_setting, current_score))
         self.best_settings.sort(key=lambda x: x[-1])
+        return self.best_settings[-n:]
 
     def score_setting(self, rotor_setting):
         e = Enigma(*rotor_setting)
         return len([m for i, m in enumerate(e.encrypt(self._cypher_text)) if m == self._text[i]])
 
 
-class PlugBoardCracker:
+class PlugBoardResolver:
 
     def __init__(self, crib, cypher_text, rotor_settings):
         self.crib = crib
@@ -103,16 +106,16 @@ class PlugBoardCracker:
                 if recent_guess not in self.plugboard_pairs[next_in_loop]:
                     break
                 current_guesses[next_in_loop].add(recent_guess)
+            # the loop is satisfied, so we can add the assumptions as (potential) valid_guesses
             if pstart == recent_guess:
                 for k, v in current_guesses.items():
                     valid_guesses[k].update(v)
-
-        # the loop is valid, so update the plugboard pais
-        # for k, v in valid_guesses.items():
-        #     self.plugboard_pairs[k].intersection_update(v)
+        # update the plugboard_pairs from which to choose from for next loop
+        for k, v in valid_guesses.items():
+            self.plugboard_pairs[k].intersection_update(v)
 
     def check_consistency(self):
-        # if right end of plug can't be attached to left end, left and can't be connected to the right end
+        # if right end of plug can't be attached to left end, the left end can't be connected to the right end...
         for left_end, potential_right_end in self.plugboard_pairs.items():
             for to_update in set(string.ascii_uppercase) - potential_right_end:
                 self.plugboard_pairs[to_update].discard(left_end)
@@ -121,7 +124,7 @@ class PlugBoardCracker:
                 for to_update in string.ascii_uppercase.replace(left_end, ""):
                     self.plugboard_pairs[to_update].discard(list(potential_right_end)[0])
         if any([len(v) == 0 for v in self.plugboard_pairs.values()]):
-            raise InvalidSettings
+            raise InvalidSettings("There is noway to setup the plugboard to produce the crib under these settings...")
 
     def eliminate_pairs(self):
         for loop in self.loops:
@@ -129,40 +132,29 @@ class PlugBoardCracker:
             self.check_consistency()
 
 
-if __name__ == "__main__":
-    e = Enigma(ring_settings="I,B,Z", plugboard_pairs="OM,CU,HQ,XZ,NK,EP,WT,DL")
-    text = "WettervorhersageXfurxdiexRegionxMoskau".upper()
-    ct = e.encrypt(text)
-    print("finding best candidates for rotor settings...")
-    ro = RotorOrder(text, ct)
-    ro.get_rotor_order()
-    best = ro.best_settings[-100:]
-    for setting, score in best:
-        pbc = PlugBoardCracker(text, ct, setting)
-        try:
-            pbc.eliminate_pairs()
-            if pbc.get_remaining() < 100:
-                print(pbc.plugboard_pairs)
-                print(setting)
-        except InvalidSettings:
-            pass
+class EnigmaResolver:
 
-    # cypher_text = e.encrypt(text)
-    # settings = list(get_possible_settings())[:1000]
-    # for i in range(1000):
-    #     print(f"{i} cracking....")
-    #     pbc = PlugBoardCracker(text, cypher_text, settings[i])
-    #     try:
-    #         j = 1
-    #         pbc.eliminate_pairs()
-    #         print(pbc.plugboard_pairs)
-    #         # for v in list(pbc.plugboard_pairs.values())[:13]:
-    #         #     j *= len(v)
-    #         # print(j)
-    #         print(f"n loops = {len(pbc.loops)}")
-    #     except InvalidSettings:
-    #         pass
-    # i = 1
-    #
-    # print(i)
-    # print(pbc.plugboard_pairs)
+    def __init__(self, crib, cypher_text):
+        self.crib = crib
+        self.cypher_text = cypher_text
+        self.rsr = RotorOrderResolver(crib, cypher_text)
+
+    def resovle(self, n=100):
+        best_rotor_settings = self.rsr.get_n_best_rotor_settings(n)
+        for rotor_settings, score in tqdm(best_rotor_settings):
+            pbr = PlugBoardResolver(self.crib, self.cypher_text, rotor_settings)
+            try:
+                pbr.eliminate_pairs()
+                if pbr.get_remaining() < 100:
+                    print(pbr.plugboard_pairs)
+                    print(rotor_settings)
+            except InvalidSettings:
+                pass
+
+
+if __name__ == "__main__":
+    e = Enigma(rotor_types="III,II,I", ring_settings="I,A,A", plugboard_pairs="OM,CU,HQ,XZ,NK,EP,WT,DL")
+    crib = "WettervorhersageXfurxdiexRegionxMoskau".upper()
+    cypher_text = e.encrypt(crib)
+    er = EnigmaResolver(crib, cypher_text)
+    er.resovle()

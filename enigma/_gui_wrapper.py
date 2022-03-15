@@ -68,8 +68,8 @@ class WrappedUi(Ui_Enigma):
 
     def read_plugboard(self):
         plugboard_pairs = self.plugboard.toPlainText().upper()
-        if all([p in string.ascii_uppercase + " " for p in plugboard_pairs]) and all(
-                [len(p) == 2 for p in plugboard_pairs.split(" ")]
+        if all([p in string.ascii_uppercase + "," for p in plugboard_pairs]) and all(
+                [len(p) == 2 for p in plugboard_pairs.split(",")]
         ):
             return plugboard_pairs
         else:

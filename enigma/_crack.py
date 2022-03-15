@@ -42,17 +42,22 @@ class RotorOrderResolver:
     def __init__(self, text, cypher_text):
         self._text = text
         self._cypher_text = cypher_text
-        self.best_setting = None
-        self.best_settings = []
+        self.best_settings = defaultdict(list)
         self.best_score = -1
 
     def get_n_best_rotor_settings(self, n):
         print('Resolving rotor settings...')
         for rotor_setting in tqdm(list(get_possible_settings())):
             current_score = self.score_setting(rotor_setting)
-            self.best_settings.append((rotor_setting, current_score))
-        self.best_settings.sort(key=lambda x: x[-1])
-        return self.best_settings[-n:]
+            rotor_order = rotor_setting[0]
+            self.best_settings[rotor_order].append((rotor_setting, current_score))
+        best_lists = []
+        print(len(self.best_settings))
+        for order in self.best_settings.values():
+            #best_lists += self.best_settings.sort(key=lambda x: x[-1])
+            best_lists += sorted(order, key=lambda x: x[-1])[-n:] #.best_settings.sort(key=lambda x: x[-1])
+        print(len(best_lists))
+        return best_lists
 
     def score_setting(self, rotor_setting):
         e = Enigma(*rotor_setting)
@@ -139,7 +144,7 @@ class EnigmaResolver:
         self.cypher_text = cypher_text
         self.rsr = RotorOrderResolver(crib, cypher_text)
 
-    def resovle(self, n=100):
+    def resovle(self, n=1000):
         best_rotor_settings = self.rsr.get_n_best_rotor_settings(n)
         for rotor_settings, score in tqdm(best_rotor_settings):
             pbr = PlugBoardResolver(self.crib, self.cypher_text, rotor_settings)
@@ -153,7 +158,8 @@ class EnigmaResolver:
 
 
 if __name__ == "__main__":
-    e = Enigma(rotor_types="III,II,I", ring_settings="I,A,A", plugboard_pairs="OM,CU,HQ,XZ,NK,EP,WT,DL")
+    e = Enigma(rotor_types="II,III,I", ring_settings="I,A,A", plugboard_pairs="OM,CU,HQ,XZ,NK,EP,WT,DL")
+    # e = Enigma(rotor_types="I,III,II", ring_settings="I,A,A", plugboard_pairs="AB,OM,CU,HQ,XZ,NK,EP,WT,DL,FI")
     crib = "WettervorhersageXfurxdiexRegionxMoskau".upper()
     cypher_text = e.encrypt(crib)
     er = EnigmaResolver(crib, cypher_text)

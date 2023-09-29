@@ -1,3 +1,4 @@
+import logging
 import string
 import random
 import networkx as nx
@@ -6,6 +7,9 @@ from enigma._enigma import Enigma
 from collections import deque, defaultdict
 from tqdm import tqdm
 from typing import List
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
 
 class InvalidSettings(Exception):
@@ -46,13 +50,12 @@ class RotorOrderResolver:
         self.best_score = -1
 
     def get_n_best_rotor_settings(self, n):
-        print('Resolving rotor settings...')
+        logger.info('Resolving rotor settings...')
         settings = []
         for rotor_setting in tqdm(list(get_possible_settings())):
             current_score = self.score_setting(rotor_setting)
             settings.append((rotor_setting, current_score))
         best_rotor_settings = sorted(settings, key=lambda x: x[-1])[-n:]
-        print(len(best_rotor_settings))
         return best_rotor_settings
 
     def score_setting(self, rotor_setting):
@@ -77,13 +80,19 @@ class PlugBoardResolver:
         return i
 
     def get_remaining_pairs(self):
-        return self._get_remaining_pairs(0, set())
+        pairs = self._get_remaining_pairs(0, set())
+        filtered_pairs = [self._filter_pair(p) for p in pairs]
+        return filtered_pairs
+
+    def _filter_pair(self, pair: str):
+        pairs = set(tuple(sorted((p[0], p[1]))) for p in pair.split(',') if p[0] != p[1])
+        return ",".join([f"{p[0]}{p[1]}" for p in sorted(pairs)])
 
     def _get_remaining_pairs(self, current_pair: int, taken: set) -> List[str]:
         current_letter = string.ascii_uppercase[current_pair]
         remaining = self.plugboard_pairs[current_letter] - taken
         all_options = []
-        if current_pair == 12:
+        if current_pair == 25:
             all_options += [f"{current_letter}{left_letter}" for left_letter in remaining]
         else:
             for left_letter in remaining:
@@ -163,16 +172,17 @@ class EnigmaResolver:
             pbr = PlugBoardResolver(self.crib, self.cypher_text, rotor_settings)
             try:
                 pbr.eliminate_pairs()
-                if pbr.get_remaining() < 100:
+                if pbr.get_remaining() < 1000:
+                    logger.info(f"Detected possible match for settings: {rotor_settings}")
                     for p in pbr.get_remaining_pairs():
-                        print(p)
+                        logger.info(p)
             except InvalidSettings:
                 pass
 
 
 if __name__ == "__main__":
-    e = Enigma(rotor_types="II,III,I", ring_settings="I,A,A", plugboard_pairs="OM,CU,XZ,NK,EP,DL")
-    crib = "WettervorhersageXfurxdiexRegionxOstXMoskau".upper()
+    e = Enigma(rotor_types="II,III,I", ring_settings="I,A,A", plugboard_pairs="CU,DL,EP,KN,MO,XZ")
+    crib = "WettervorhersageXXXfurxdiexRegionXXXOstXXXMoskau".upper()
     cypher_text = e.encrypt(crib)
     er = EnigmaResolver(crib, cypher_text)
     er.resolve()

@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='engima',
+    name='enigma',
     version='1.0.0',
-    py_modules=['enigma'],
+    packages=['enigma'],
     install_requires=[
         'PyQt5',
         'Click'
@@ -14,3 +14,4 @@ setup(
         ],
     },
 )
+

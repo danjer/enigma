@@ -5,6 +5,7 @@ from itertools import permutations, product
 from enigma._enigma import Enigma
 from collections import deque, defaultdict
 from tqdm import tqdm
+from typing import List
 
 
 class InvalidSettings(Exception):
@@ -65,7 +66,7 @@ class PlugBoardResolver:
         self.crib = crib
         self.cypher_text = cypher_text
         self.rotor_settings = rotor_settings
-        self.plugboard_pairs = {left_end: set((l2 for l2 in string.ascii_uppercase)) for left_end in
+        self.plugboard_pairs = {left_end: set((right_end for right_end in string.ascii_uppercase)) for left_end in
                                 string.ascii_uppercase}
         self.loops = self.get_loops()
 
@@ -74,6 +75,23 @@ class PlugBoardResolver:
         for v in list(self.plugboard_pairs.values())[:13]:
             i *= len(v)
         return i
+
+    def get_remaining_pairs(self):
+        return self._get_remaining_pairs(0, set())
+
+    def _get_remaining_pairs(self, current_pair: int, taken: set) -> List[str]:
+        current_letter = string.ascii_uppercase[current_pair]
+        remaining = self.plugboard_pairs[current_letter] - taken
+        all_options = []
+        if current_pair == 12:
+            all_options += [f"{current_letter}{left_letter}" for left_letter in remaining]
+        else:
+            for left_letter in remaining:
+                updated_taken = taken.copy()
+                updated_taken.add(left_letter)
+                trailing = self._get_remaining_pairs(current_pair + 1, updated_taken)
+                all_options += [f"{current_letter}{left_letter},{tail}" for tail in trailing]
+        return all_options
 
     def build_loop_graph(self):
         g = nx.Graph()
@@ -146,25 +164,10 @@ class EnigmaResolver:
             try:
                 pbr.eliminate_pairs()
                 if pbr.get_remaining() < 100:
-                    print(pbr.plugboard_pairs)
-                    print(rotor_settings)
+                    for p in pbr.get_remaining_pairs():
+                        print(p)
             except InvalidSettings:
                 pass
-
-
-def score_setting(rotor_setting, cypher_text):
-    e = Enigma(*rotor_setting)
-    return len([l for l, r in zip(e.encrypt(cypher_text), cypher_text) if l == r])
-
-
-def eliminate_plugboard_pairs(rotor_settings, crib, cypher_text):
-    pbr = PlugBoardResolver(crib, cypher_text, rotor_settings)
-    try:
-        pbr.eliminate_pairs()
-        if pbr.get_remaining() < 100:
-            return rotor_settings
-    except InvalidSettings:
-        return None
 
 
 if __name__ == "__main__":

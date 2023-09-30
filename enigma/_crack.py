@@ -65,10 +65,10 @@ class RotorOrderResolver:
 
 class PlugBoardResolver:
 
-    def __init__(self, crib, cypher_text, rotor_settings):
+    def __init__(self, crib, cypher_text, rotor_types, reflector_type, ring_settings):
         self.crib = crib
         self.cypher_text = cypher_text
-        self.rotor_settings = rotor_settings
+        self.rotor_settings = (rotor_types, reflector_type, ring_settings)
         self.plugboard_pairs = {left_end: set((right_end for right_end in string.ascii_uppercase)) for left_end in
                                 string.ascii_uppercase}
         self.loops = self.get_loops()

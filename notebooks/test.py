@@ -6,41 +6,86 @@ from pyspark.sql.session import SparkSession
 from pyspark.sql import Row
 from functools import partial
 
-NOT_RESOLVABLE = "NOT_RESOLVABLE"
+NOT_RESOLVABLE = "NOT_RESOLVABLE"  # sentinel to indicate that rotor settings are not valid/resolvable
 
 
-def translate_with_settings(rotor_types, reflector_type, ring_settings, plugboard_pairs, text):
+def translate_with_settings(rotor_types: str, reflector_type: str, ring_settings: str, plugboard_pairs: str, text: str):
+    """Translates a text using Enigma machine and provided configurations
+
+    Args:
+        rotor_types (str): The rotor types as comma separated string e.g. "III,II,I"
+        reflector_type (str): The reflector to use e.g. "B"
+        ring_settings (str): The ring settings to use (offsets) e.g. "A,B,A"
+        plugboard_pairs (str): The plugboard config as comma separated string e.g. "AC,BD"
+        text (str): The text to encrypt
+    Returns:
+        encrypted_text (str): The encrypted text
+    """
     enigma = Enigma(rotor_types=rotor_types, reflector_type=reflector_type, ring_settings=ring_settings,
                     plugboard_pairs=plugboard_pairs)
     return enigma.encrypt(text)
 
 
-def score_setting(rotor_types, reflector_type, ring_settings, plugboard_pairs, cypher, crib) -> int:
+def score_setting(rotor_types: str, reflector_type: str, ring_settings: str, plugboard_pairs: str, cypher: str,
+                  crib: str) -> int:
+    """Score the enigma settings using a known crib and the corresponding cypher text based on their
+    similarity
+
+    Args:
+        rotor_types (str): The rotor types as comma separated string e.g. "III,II,I"
+        reflector_type (str): The reflector to use e.g. "B"
+        ring_settings (str): The ring settings to use (offsets) e.g. "A,B,A"
+        plugboard_pairs (str): The plugboard config as comma separated string e.g. "AC,BD"
+        cypher (str): The encrypted text
+        crib (str): The original text
+    Returns:
+        score (int): the score of the settings
+    """
     output = translate_with_settings(rotor_types, reflector_type, ring_settings, plugboard_pairs, cypher)
     return len([l for l, r in zip(output, crib) if l == r])
 
 
-def resolve_plugboard_possibilities(rotor_types, reflector_type, ring_settings, cypher, crib) -> List[str]:
+def resolve_plugboard_possibilities(rotor_types: str, reflector_type: str, ring_settings: str, cypher: str,
+                                    crib: str) -> List[str]:
+    """Find possible plugboard configurations for 'rotor' configured enigma machine that do not contradict
+
+    Args:
+        rotor_types (str): The rotor types as comma separated string e.g. "III,II,I"
+        reflector_type (str): The reflector to use e.g. "B"
+        ring_settings (str): The ring settings to use (offsets) e.g. "A,B,A"
+        cypher (str): The encrypted text
+        crib (str): The original text
+    Returns:
+        plugboard_configurations (List[str]): a list of possible plugboard configurations
+    """
+
     plugboard_resolver = PlugBoardResolver(crib, cypher, rotor_types, reflector_type, ring_settings)
     try:
         plugboard_resolver.eliminate_pairs()
+        if plugboard_resolver.get_remaining() > 1000:
+            raise InvalidSettings()
+        else:
+            return plugboard_resolver.get_remaining_pairs()
     except InvalidSettings:
         return [NOT_RESOLVABLE]
-    if plugboard_resolver.get_remaining() > 1000:
-        return [NOT_RESOLVABLE]
-    else:
-        return plugboard_resolver.get_remaining_pairs()
 
 
+# build spark session
 spark = SparkSession.builder.getOrCreate()
+crib = "WettervorhersageXXXfurxdiexRegionXXXOstXXXMoskau".upper()
+complete_message = f"{crib}xxxextremxKaltexxxTemperaturenxxxundxxxstarkerxxxSchneefallxxxseixxxgewarnt"
 
 e = Enigma(rotor_types="II,III,I", ring_settings="I,A,A", plugboard_pairs="CU,DL,EP,KN,MO,XZ")
-crib = "WettervorhersageXXXfurxdiexRegionXXXOstXXXMoskau".upper()
 cypher = e.encrypt(crib)
 
+# To find best matching rotor settings without plugboard configured
 naive_score_function = partial(score_setting, cypher=cypher, crib=crib, plugboard_pairs=None)
-score_function = partial(score_setting, cypher=cypher, crib=crib)
+
+# To retrieve possible plugboard configurations
 resolve_plugboard_function = partial(resolve_plugboard_possibilities, cypher=cypher, crib=crib)
+
+# To score a completely configured enigma
+score_function = partial(score_setting, cypher=cypher, crib=crib)
 
 rdd = spark.sparkContext.parallelize(
     [(v, Row(rotor_types=v[0], reflector_type=v[1], ring_settings=v[2])) for v in get_possible_rotor_settings()], 2)

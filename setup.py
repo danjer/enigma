@@ -6,7 +6,9 @@ setup(
     packages=['enigma'],
     install_requires=[
         'PyQt5',
-        'Click'
+        'Click',
+        'tqdm',
+        'networkx'
     ],
     entry_points={
         'console_scripts': [

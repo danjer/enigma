@@ -3,7 +3,7 @@ import string
 import random
 import networkx as nx
 from itertools import permutations, product
-from enigma._enigma import Enigma
+from enigma.emulator import Enigma
 from collections import deque, defaultdict
 from tqdm import tqdm
 from typing import List
@@ -16,7 +16,7 @@ class InvalidSettings(Exception):
     pass
 
 
-def get_possible_settings():
+def get_possible_rotor_settings():
     rotor_options = [",".join(c) for c in permutations(["I", "II", "III"], 3)]
     positions = [",".join(c) for c in product(string.ascii_uppercase, string.ascii_uppercase, string.ascii_uppercase)]
     return product(rotor_options, "B", positions)
@@ -38,7 +38,7 @@ def get_random_plugboard_pair():
 
 
 def get_random_enigma():
-    settings = random.choice(list(get_possible_settings()))
+    settings = random.choice(list(get_possible_rotor_settings()))
     return Enigma(*settings)
 
 
@@ -52,7 +52,7 @@ class RotorOrderResolver:
     def get_n_best_rotor_settings(self, n):
         logger.info('Resolving rotor settings...')
         settings = []
-        for rotor_setting in tqdm(list(get_possible_settings())):
+        for rotor_setting in tqdm(list(get_possible_rotor_settings())):
             current_score = self.score_setting(rotor_setting)
             settings.append((rotor_setting, current_score))
         best_rotor_settings = sorted(settings, key=lambda x: x[-1])[-n:]
@@ -178,11 +178,3 @@ class EnigmaResolver:
                         logger.info(p)
             except InvalidSettings:
                 pass
-
-
-if __name__ == "__main__":
-    e = Enigma(rotor_types="II,III,I", ring_settings="I,A,A", plugboard_pairs="CU,DL,EP,KN,MO,XZ")
-    crib = "WettervorhersageXXXfurxdiexRegionXXXOstXXXMoskau".upper()
-    cypher_text = e.encrypt(crib)
-    er = EnigmaResolver(crib, cypher_text)
-    er.resolve()

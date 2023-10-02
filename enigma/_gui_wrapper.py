@@ -2,7 +2,7 @@
 
 import string
 from PyQt5 import QtWidgets
-from enigma._enigma import Enigma
+from enigma.emulator import Enigma
 from enigma._rotors import ROTORS, REFLECTORS
 from enigma._gui import Ui_Enigma
 

@@ -1,4 +1,4 @@
-from enigma._crack import PlugBoardResolver
+from enigma.crack import PlugBoardResolver
 
 pairs = {"A": {"B", "A", "D"}, "B": {"A", "B"}, "C": {"C", "D"}, "D": {"D", "C", "A"}, "E": {"E"}, "F": {"F"},
          "G": {"G"},

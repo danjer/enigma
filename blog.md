@@ -21,4 +21,17 @@ the fact that each input letter differs from the output makes it relatively easy
 of the original text, with the encrypted text. Numberphile has some
 informative [videos](https://www.youtube.com/watch?v=G2_Q9FoD-oQ) about the Enigma in which they explain the algorithms
 involved in breaking the Enigma. I implemented these algorithms and an Enigma emulator in a separate Python package,
-which I used in a standalone script to break the Enigma with parallel computation on Apache Spark.
+which I used in a standalone script to break the Enigma with parallel computation on Databricks (sort of Spark as a
+service). All the code for this project is available on Github.
+
+### Setting up the infrastructure
+In this project I use Databricks as the Spark provider. To set up the Databricks workspace in azure cloud I use
+[Terraform](https://www.terraform.io/). Assuming that terraform is installed, enter the terraform folder and run:
+```commandline
+terraform init
+terraform apply
+```
+After the whole infrastructure is created, which will probably take a few minutes, you can navigate to
+the databricks workspace by clicking on the URL that is outputed in the terminal.
+The wokspace if preconfigured with a single node cluster with the engima-emulator installed. Also, the notebook
+that I w

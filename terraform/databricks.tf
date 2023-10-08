@@ -30,8 +30,8 @@ resource "databricks_cluster" "single_node" {
 }
 
 resource "databricks_notebook" "cracking_engima" {
-  source = "../notebooks/cracking_engima.ipynb"
-  path   = "/Shared/cracking_engima"
+  source = "../notebooks/cracking_enigma.dbc"
+  path   = "/Shared/cracking_enigma"
 }
 
 resource "databricks_dbfs_file" "enigma_emulator" {
